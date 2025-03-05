@@ -1,0 +1,317 @@
+Could you please create a Student Registration system to apply application for admission in laravel 11, mysql and bootstrap 5 (dont use livewire as of now).
+Use modern and modular top notch clean architecture and UI with propper error handling, validation, security aspect, use logging, try catch, transaction.
+I already have all the migrations and models based on the database structure given below.
+
+My application flow should be like:
+
+
+Initial screen there will be two options/buttons one for registration and another one is for login (for already registered students).
+
+On login, there can be login using Registered Email ID or Phone and password, and after login there will be a dashboard where have 3 Navigation Tabs and on clicking each tabs there will open a different pages, first General Instruction, Online Applications, Application History, Download Admit Card etc, and under online applications there will be a link for the available advertisement application. and on clicking that link should go to apply application form screen.
+
+On registration screen: we need to create a students with basic details such as first name, last name, gender, date of birth, mobile, email, password, confirm password. and after filling all information, there will be a button preview and Submit and after clicking on that button there will be a preview will be display with all the information filled by user and on that preview modal or popup there will be a checkbox and two buttons one button is Edit and another one is Create and after clicking the checkbox where will be written as "I have re-checked the above details and found correct." Create button will enable otherwise it should be disabled, and on click on that create button, should show a warning popup that once submit the data it can not be modified and a proceed button will be there after click on proceed redirect to verification screen where students have to verify their account using mobile and email otp, please use only email otp as of now and consider if we want then we can use mobile otp verification too in future, make a functionality such as same otp or different otp can be send and used for verification and either mobile or email otp or both otp verification can be enable or disable. After otp verified successfull, students should be registered and redirect to a dashboard page where have 3 Navigation Tabs and on clicking each tabs there will open a different pages, General Instruction, Online Applications, Application History, Download Admit Card etc, and under online applications there will be a link for the available advertisement application. and on clicking that link should go to apply application form screen.
+
+There will need to create a multi step form 
+
+Registration For:
+
+
+From the available advertisements, Select Batch, then Program, and after selection, students will have to fill up all the details like multi step from, starting from step 1 where students basic details will be show which are fetch from student table and after every step completion and before go to next step theres need to a popup with preview the filled details by students and there will be two options, edit and "proceed to next", if edit option choosen then it should be on that screen otherwise save into database and go to next steps and will act accordingly. At the final step, there will be two options save and submit and on click submit there will need to preview everything associated with that students means every step filled by students form need to preview and on preview there will two options edit, and final submit. after final submit students can not do edit or enter anything this alert should show as warning like before every next step go showing and act accordingly, those students who are submitted successfully, can only see in their dashboard in application history screen where they can a option to download pdf of application form where have everything filled by student.
+
+
+
+And this is my database structure:
+
+/*********************** CORE STUDENT TABLES ***********************/
+
+CREATE TABLE students (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    uuid CHAR(36) NOT NULL UNIQUE COMMENT 'Global unique identifier',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE student_profiles (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    -- Personal Details (Step 1)
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    dob DATE NOT NULL,
+    gender ENUM('Male', 'Female', 'Others') NOT NULL,
+    category ENUM('UR', 'SC', 'ST', 'OBC A', 'OBC B') NOT NULL,
+    is_pwbd BOOLEAN DEFAULT FALSE,
+    occupation VARCHAR(255),
+    father_name VARCHAR(255) NOT NULL,
+    mother_name VARCHAR(255) NOT NULL,
+    father_occupation VARCHAR(255),
+    mother_occupation VARCHAR(255),
+    mobile VARCHAR(15) NOT NULL,
+    alternate_mobile VARCHAR(15),
+    whatsapp VARCHAR(15),
+    email VARCHAR(255) NOT NULL,
+    alternate_email VARCHAR(255),
+    family_income DECIMAL(10,2),
+    school_language VARCHAR(50),
+    secondary_roll VARCHAR(50),
+    upsc_community ENUM('UR', 'SC', 'ST', 'OBC'),
+    activities JSON,
+    hobbies JSON,
+    distance DECIMAL(5,2) COMMENT 'Distance from center in km',
+    -- Version Control
+    valid_from DATE NOT NULL,
+    valid_until DATE,
+    is_current BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    INDEX idx_current_profile (is_current)
+) ENGINE=InnoDB;
+
+/*********************** ACADEMIC QUALIFICATIONS (Step 2) ***********************/
+
+CREATE TABLE academic_qualifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    level ENUM('Secondary', 'Higher Secondary', 'Graduation', 'Post Graduation', 'Other') NOT NULL,
+    institute VARCHAR(255) NOT NULL,
+    board_university VARCHAR(255) NOT NULL,
+    subjects TEXT,
+    year_passed YEAR NOT NULL,
+    total_marks DECIMAL(5,2),
+    marks_obtained DECIMAL(5,2),
+    percentage DECIMAL(5,2),
+    cgpa DECIMAL(4,2),
+    division VARCHAR(50),
+    is_completed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+/*********************** ADDRESSES (Step 3) ***********************/
+
+CREATE TABLE addresses (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    type ENUM('present', 'permanent') NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    district VARCHAR(255) NOT NULL,
+    subdistrict VARCHAR(255),
+    address_line1 TEXT NOT NULL,
+    address_line2 TEXT,
+    post_office VARCHAR(255) NOT NULL,
+    police_station VARCHAR(255) NOT NULL,
+    pin_code VARCHAR(10) NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    UNIQUE (student_id, type)
+) ENGINE=InnoDB;
+
+/*********************** BATCH & PROGRAM STRUCTURE ***********************/
+
+CREATE TABLE batches (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL COMMENT 'e.g., 2025 Admission Batch',
+    academic_year YEAR NOT NULL,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status ENUM('planned', 'active', 'archived') DEFAULT 'planned'
+) ENGINE=InnoDB;
+
+CREATE TABLE programs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL UNIQUE COMMENT 'e.g., Composite Course',
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT,
+    base_duration VARCHAR(50),
+    min_qualification TEXT
+) ENGINE=InnoDB;
+
+CREATE TABLE batch_programs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    batch_id INT NOT NULL,
+    program_id INT NOT NULL,
+    fee DECIMAL(10,2) NOT NULL,
+    available_seats INT NOT NULL,
+    max_applications INT,
+    status ENUM('open', 'closed') DEFAULT 'open',
+    FOREIGN KEY (batch_id) REFERENCES batches(id) ON DELETE CASCADE,
+    FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE RESTRICT,
+    UNIQUE (batch_id, program_id)
+) ENGINE=InnoDB;
+
+/*********************** ADVERTISEMENT SYSTEM ***********************/
+
+CREATE TABLE advertisements (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    batch_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    application_start DATETIME NOT NULL,
+    application_end DATETIME NOT NULL,
+    status ENUM('draft', 'published', 'closed') DEFAULT 'draft',
+    instructions TEXT,
+    FOREIGN KEY (batch_id) REFERENCES batches(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE advertisement_programs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    advertisement_id INT NOT NULL,
+    batch_program_id INT NOT NULL,
+    available_seats INT NOT NULL,
+    FOREIGN KEY (advertisement_id) REFERENCES advertisements(id) ON DELETE CASCADE,
+    FOREIGN KEY (batch_program_id) REFERENCES batch_programs(id) ON DELETE RESTRICT,
+    UNIQUE (advertisement_id, batch_program_id)
+) ENGINE=InnoDB;
+
+/*********************** APPLICATION SYSTEM (Step 4-6) ***********************/
+
+CREATE TABLE applications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    advertisement_id INT NOT NULL,
+    batch_program_id INT NOT NULL,
+    application_number VARCHAR(50) NOT NULL UNIQUE COMMENT 'Format: ADV-YYYY-PROG-00001',
+    -- Step 4 Fields
+    optional_subject VARCHAR(255),
+    is_appearing_upsc_cse BOOLEAN DEFAULT FALSE,
+    upsc_attempts_count TINYINT UNSIGNED DEFAULT 0,
+    -- Status Tracking
+    status ENUM('draft', 'submitted', 'under_review', 'approved', 'rejected', 'waitlisted') DEFAULT 'draft',
+    payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
+    applied_at TIMESTAMP NULL,
+    -- Constraints
+    UNIQUE (student_id, advertisement_id, batch_program_id),
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (advertisement_id) REFERENCES advertisements(id) ON DELETE RESTRICT,
+    FOREIGN KEY (batch_program_id) REFERENCES batch_programs(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+/*********************** SUPPORTING TABLES ***********************/
+
+-- Step 4: Employment & Enrollment
+CREATE TABLE employment_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    is_employed BOOLEAN DEFAULT FALSE,
+    designation VARCHAR(255),
+    employer VARCHAR(255),
+    location VARCHAR(255),
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE current_enrollments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    course_name VARCHAR(255),
+    institute VARCHAR(255),
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Step 4: UPSC Attempts
+CREATE TABLE upsc_attempts (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    exam_year YEAR NOT NULL,
+    roll_number VARCHAR(255) NOT NULL,
+    prelims_cleared BOOLEAN,
+    mains_cleared BOOLEAN,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Step 5: Documents
+CREATE TABLE documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    type ENUM('photo', 'signature', 'category_cert', 'pwbd_cert', 'payment_ss') NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    verified_at TIMESTAMP NULL,
+    verification_status ENUM('pending', 'verified', 'rejected') DEFAULT 'pending',
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Step 6: Payments
+CREATE TABLE payments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    method ENUM('UPI', 'Bank Transfer') NOT NULL,
+    transaction_date DATE NOT NULL,
+    transaction_id VARCHAR(255) NOT NULL UNIQUE,
+    screenshot_document_id INT,
+    status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE,
+    FOREIGN KEY (screenshot_document_id) REFERENCES documents(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+/*********************** SYSTEM TABLES ***********************/
+
+CREATE TABLE application_timelines (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT NOT NULL,
+    event_type ENUM('created', 'submitted', 'payment_received', 'status_changed') NOT NULL,
+    event_data JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE audit_logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    action VARCHAR(50) NOT NULL,
+    table_name VARCHAR(255) NOT NULL,
+    record_id INT NOT NULL,
+    old_values JSON,
+    new_values JSON,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    type ENUM('application', 'payment', 'document', 'reminder') NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
+
+/*********************** For OTP Verification Implementation ***********************/
+
+CREATE TABLE `otp_verifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `student_id` INT NULL,
+    `email` VARCHAR(255) NULL,
+    `mobile` VARCHAR(255) NULL,
+    `otp_code` VARCHAR(255) NOT NULL,
+    `verification_type` ENUM('email', 'mobile') NOT NULL,
+    `expires_at` TIMESTAMP NOT NULL,
+    `attempts` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY `email_index` (`email`),
+    KEY `mobile_index` (`mobile`),
+    KEY `email_expires_at_index` (`email`, `expires_at`),
+    KEY `mobile_expires_at_index` (`mobile`, `expires_at`),
+    CONSTRAINT `student_id_fk` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+/*********************** INDEXES ***********************/
+CREATE INDEX idx_student_search ON students(uuid);
+CREATE INDEX idx_applications_status ON applications(status, applied_at);
+CREATE INDEX idx_documents_verification ON documents(verification_status, type);
+CREATE INDEX idx_payments_transaction ON payments(transaction_id, transaction_date);
+CREATE FULLTEXT INDEX idx_academic_search ON academic_qualifications(institute, board_university);
+```
+
+
+=======
+Could you please create a Student Registration system to apply application for admission in laravel 11, mysql and bootstrap 5 (don't use livewire as of now use bootstrap 5).
+Please provide modern fully dynamic clean architecture and top notch UI with proper error handling, validation, security aspect, use logging, try catch, transaction.
+I already have all the migrations and models based on the database structure given below.
+
+
+please continue with fresh setup from starting so that i can do implement step by step
