@@ -1,5 +1,31 @@
 # admission
 
+# Create new Laravel project
+composer create-project laravel/laravel admission-system
+cd admission-system
+
+# Install dependencies
+composer require laravel/ui
+php artisan ui bootstrap
+php artisan ui bootstrap --auth
+npm install && npm run build
+
+
+composer require laravel/sanctum
+composer require intervention/image
+composer require spatie/laravel-permission
+composer require barryvdh/laravel-dompdf
+
+npm install bootstrap@5 axios sweetalert2
+npm install bootstrap@5 @popperjs/core sweetalert2
+npm run dev
+
+# Configure .env file
+DB_DATABASE=admission_system
+DB_USERNAME=root
+DB_PASSWORD=
+
+
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
