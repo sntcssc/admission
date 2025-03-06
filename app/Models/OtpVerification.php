@@ -14,7 +14,7 @@ class OtpVerification extends Model
         'email',
         'mobile',
         'otp_code',
-        'verification_type',
+        'type',
         'expires_at',
         'attempts'
     ];

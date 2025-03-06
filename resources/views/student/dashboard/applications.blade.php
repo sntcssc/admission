@@ -23,7 +23,7 @@
                                     {{ $ad->application_end->format('d M Y') }}
                                 </small>
                             </p>
-                            <a href="{{ route('student.application.create', $ad->id) }}" 
+                            <a href="{{ route('student.applications.create', $ad->id) }}" 
                                class="btn btn-primary">
                                 Apply Now
                             </a>

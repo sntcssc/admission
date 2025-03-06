@@ -33,6 +33,7 @@ class ApplicationController extends Controller
             
             return redirect()->route('student.application.status', $application->id);
         } catch (\Exception $e) {
+            dd($e->getMessage());
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
