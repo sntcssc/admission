@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->nullable()->index();
             $table->string('mobile')->nullable()->index();
             $table->string('otp_code');
-            $table->enum('verification_type', ['email', 'mobile']);
+            $table->enum('type', ['email', 'mobile']);
             $table->timestamp('expires_at');
             $table->unsignedSmallInteger('attempts')->default(0);
             $table->timestamps();

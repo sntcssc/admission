@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+            $table->string('secondary_roll')->unique();
+            $table->string('email')->unique();
+            $table->string('mobile')->unique();
+            $table->string('password');
             $table->timestamps();
             $table->softDeletes();
         });
