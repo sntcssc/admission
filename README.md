@@ -20,6 +20,29 @@ npm install bootstrap@5 axios sweetalert2
 npm install bootstrap@5 @popperjs/core sweetalert2
 npm run dev
 
+
+# To Create a Seeder
+php artisan make:seeder BatchesTableSeeder
+
+# Run Seeder
+php artisan db:seed
+
+# To run just the BatchesTableSeeder
+php artisan db:seed --class=BatchesTableSeeder
+
+# To Run Migration fresh
+php artisan migrate:refresh
+
+# Clear application cache
+php artisan optimize
+php artisan view:clear
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan config:cache
+php artisan route:cache
+
+
 # Configure .env file
 DB_DATABASE=admission_system
 DB_USERNAME=root
