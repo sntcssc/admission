@@ -41,4 +41,17 @@ class Application extends Model
     {
         return $this->belongsTo(BatchProgram::class);
     }
+
+    // For ApplicationAcademicQualification Table
+    public function academicQualifications()
+    {
+        return $this->hasMany(ApplicationAcademicQualification::class);
+    }
+
+    //  For ApplicationAddress table
+
+    public function applicationAddresses()
+    {
+        return $this->hasMany(ApplicationAddress::class);
+    }
 }

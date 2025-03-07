@@ -29,6 +29,16 @@ class Student extends Authenticatable
         return $this->hasOne(StudentProfile::class);
     }
 
+    // public function profiles()
+    // {
+    //     return $this->hasMany(StudentProfile::class);
+    // }
+
+    // public function currentProfile()
+    // {
+    //     return $this->hasOne(StudentProfile::class)->where('is_current', true);
+    // }
+
     public function qualifications()
     {
         return $this->hasMany(AcademicQualification::class);

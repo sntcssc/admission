@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('application_id')->constrained();
             $table->string('event_type');
             $table->json('event_data')->nullable();
+            $table->json('event_context')->nullable();
             $table->timestamps();
         });
     }

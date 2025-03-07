@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained()->cascadeOnDelete();
             $table->foreignId('advertisement_id')->constrained();
-            $table->foreignId('batch_program_id')->constrained();
+            $table->foreignId('advertisement_program_id')->constrained('advertisement_programs');
+            $table->foreignId('student_profile_id')->constrained('student_profiles')->cascadeOnDelete();
             $table->string('application_number')->unique();
             $table->string('optional_subject')->nullable();
             $table->boolean('is_appearing_upsc_cse')->default(false);
@@ -25,7 +26,7 @@ return new class extends Migration
             $table->timestamp('applied_at')->nullable();
             $table->timestamps();
             
-            $table->unique(['student_id', 'advertisement_id', 'batch_program_id']);
+            $table->unique(['student_id', 'advertisement_id', 'advertisement_program_id']);
         });
     }
 

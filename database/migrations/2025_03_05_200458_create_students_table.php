@@ -15,6 +15,11 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('secondary_roll')->unique();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->date('dob');
+            $table->string('gender')->comment('Male, Female, Others');
+            $table->string('category')->nullable()->comment('UR, SC, ST, OBC A, OBC B');
             $table->string('email')->unique();
             $table->string('mobile')->unique();
             $table->string('password');
